@@ -25,4 +25,10 @@ describe('config', () => {
   it('零值边界抛错', () => {
     expect(() => parseConfig({ bucketBoundaries: [0, 24] })).toThrow(/正数/);
   });
+  it('primeThreshold 为 NaN 抛错', () => {
+    expect(() => parseConfig({ primeThreshold: NaN })).toThrow(/primeThreshold/);
+  });
+  it('分桶边界含 NaN 抛错', () => {
+    expect(() => parseConfig({ bucketBoundaries: [16, NaN, 50] })).toThrow(/NaN/);
+  });
 });

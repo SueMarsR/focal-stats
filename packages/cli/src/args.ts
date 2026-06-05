@@ -45,7 +45,14 @@ export function parseCliArgs(argv: string[]): CliOptions {
   if (values.top) partial.topN = Number(values.top);
 
   const format = values.json ? 'json' : values.csv ? 'csv' : values.html ? 'html' : 'text';
-  const headerBytes = values['header-bytes'] ? Number(values['header-bytes']) : 1024 * 1024;
+  let headerBytes = 1024 * 1024;
+  if (values['header-bytes']) {
+    const n = Number(values['header-bytes']);
+    if (!Number.isInteger(n) || n < 1) {
+      throw new Error(`--header-bytes 必须为正整数，收到: ${values['header-bytes']}`);
+    }
+    headerBytes = n;
+  }
 
   return { path, config: parseConfig(partial), format, headerBytes };
 }

@@ -1,5 +1,8 @@
 import type { FocalStats } from '@focal-stats/core';
 
+const esc = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 export function toJson(stats: FocalStats): string {
   return JSON.stringify(stats, null, 2);
 }
@@ -17,12 +20,12 @@ export function toHtml(stats: FocalStats): string {
   const bars = stats.buckets
     .map(
       (b) =>
-        `<div class="row"><span class="lbl">${b.label}</span>` +
+        `<div class="row"><span class="lbl">${esc(b.label)}</span>` +
         `<span class="bar" style="width:${b.percentage}%"></span>` +
         `<span class="val">${b.percentage}% (${b.count})</span></div>`,
     )
     .join('');
-  const insights = stats.insights.map((i) => `<li>${i.message}</li>`).join('');
+  const insights = stats.insights.map((i) => `<li>${esc(i.message)}</li>`).join('');
   return `<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>焦段统计</title><style>
 body{font-family:system-ui;max-width:720px;margin:2rem auto;padding:0 1rem}
 .row{display:flex;align-items:center;gap:.5rem;margin:.25rem 0}

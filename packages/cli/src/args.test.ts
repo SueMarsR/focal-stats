@@ -26,4 +26,7 @@ describe('parseCliArgs', () => {
   it('--buckets 含非数字抛错', () => {
     expect(() => parseCliArgs(['/sd', '--buckets', '24,abc'])).toThrow(/非数字/);
   });
+  it('--header-bytes 非正整数抛错', () => {
+    expect(() => parseCliArgs(['/sd', '--header-bytes', 'abc'])).toThrow(/header-bytes/);
+  });
 });

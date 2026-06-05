@@ -12,13 +12,14 @@ export const DEFAULT_CONFIG: AnalyzeConfig = Object.freeze({
 export function validateConfig(config: AnalyzeConfig): void {
   const b = config.bucketBoundaries;
   if (b.length === 0) throw new Error('bucketBoundaries 不能为空');
+  if (b.some((x) => Number.isNaN(x))) throw new Error('bucketBoundaries 含无效数字 (NaN)');
   if (b.some((x) => x <= 0)) throw new Error('bucketBoundaries 必须为正数');
   for (let i = 1; i < b.length; i++) {
     if (b[i] <= b[i - 1]) {
       throw new Error(`bucketBoundaries 必须严格升序，发现 ${b[i - 1]} >= ${b[i]}`);
     }
   }
-  if (config.primeThreshold < 0 || config.primeThreshold > 1) {
+  if (Number.isNaN(config.primeThreshold) || config.primeThreshold < 0 || config.primeThreshold > 1) {
     throw new Error(`primeThreshold 必须在 0–1 之间，收到 ${config.primeThreshold}`);
   }
   if (!Number.isInteger(config.topN) || config.topN < 1) {

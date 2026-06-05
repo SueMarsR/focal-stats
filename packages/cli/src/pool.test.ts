@@ -18,4 +18,12 @@ describe('mapPool', () => {
     });
     expect(maxActive).toBeLessThanOrEqual(3);
   });
+  it('fn 抛出时 mapPool 拒绝', async () => {
+    await expect(
+      mapPool([1, 2, 3], 2, async (n) => {
+        if (n === 2) throw new Error('boom');
+        return n;
+      }),
+    ).rejects.toThrow('boom');
+  });
 });
