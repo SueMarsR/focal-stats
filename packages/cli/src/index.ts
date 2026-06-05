@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+import { realpathSync } from 'node:fs';
 import { analyze, extractExif } from '@focal-stats/core';
 import type { PhotoExif, SkippedFile } from '@focal-stats/core';
 import { parseCliArgs } from './args.js';
@@ -12,7 +14,8 @@ export async function run(argv: string[]): Promise<string> {
   const photos: PhotoExif[] = [];
   const skipped: SkippedFile[] = [];
 
-  const results = await mapPool(files, 8, async (file) => {
+  const CONCURRENCY = 8; // parallel file-read workers; I/O-bound, not CPU-bound
+  const results = await mapPool(files, CONCURRENCY, async (file) => {
     try {
       return extractExif(await readHeader(file, opts.headerBytes), file);
     } catch {
@@ -31,7 +34,11 @@ export async function run(argv: string[]): Promise<string> {
   return renderText(stats);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+const invokedDirectly =
+  process.argv[1] !== undefined &&
+  fileURLToPath(import.meta.url) === realpathSync(process.argv[1]);
+
+if (invokedDirectly) {
   run(process.argv.slice(2))
     .then((out) => process.stdout.write(out + '\n'))
     .catch((err) => {
