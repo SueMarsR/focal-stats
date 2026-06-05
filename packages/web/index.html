@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>焦段统计 · Focal Stats</title>
+    <style>
+      body { font-family: system-ui; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+      fieldset { border: 1px solid #ddd; border-radius: 8px; margin: 1rem 0; }
+      label { display: inline-flex; gap: .35rem; align-items: center; margin: .25rem .75rem .25rem 0; }
+      input[type="text"], input[type="number"] { width: 8rem; }
+      #status { color: #555; }
+      .card { background: #f6f8ff; border-radius: 8px; padding: .75rem 1rem; margin: .5rem 0; }
+    </style>
+  </head>
+  <body>
+    <h1>焦段统计</h1>
+    <p>选择 SD 卡文件夹，照片<strong>不会上传</strong>，全程浏览器本地解析 EXIF。</p>
+
+    <p><input id="picker" type="file" webkitdirectory multiple /></p>
+
+    <fieldset>
+      <legend>设置</legend>
+      <label>模式
+        <select id="mode"><option value="equiv35">35mm 等效</option><option value="raw">原始焦距</option></select>
+      </label>
+      <label>分桶边界 <input id="buckets" type="text" value="16,24,35,50,70,100,200" /></label>
+      <label>镜头筛选 <input id="lens" type="text" placeholder="如 24-70" /></label>
+      <label>机身筛选 <input id="camera" type="text" placeholder="如 A7" /></label>
+      <label>定焦阈值 <input id="threshold" type="number" min="0" max="1" step="0.05" value="0.6" /></label>
+      <label>Top-N <input id="topn" type="number" min="1" value="3" /></label>
+    </fieldset>
+
+    <p id="status"></p>
+    <div id="chart"></div>
+    <div id="insights"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
