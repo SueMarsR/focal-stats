@@ -1,6 +1,8 @@
 import { extractExif } from '@focal-stats/core';
 import type { PhotoExif, SkippedFile } from '@focal-stats/core';
 
+const PROGRESS_INTERVAL = 25;
+
 interface ParseRequest { files: File[]; headerBytes: number }
 
 self.onmessage = async (e: MessageEvent<ParseRequest>) => {
@@ -18,7 +20,7 @@ self.onmessage = async (e: MessageEvent<ParseRequest>) => {
       skipped.push({ name: file.name, reason: 'read-error' });
     }
     done++;
-    if (done % 25 === 0 || done === files.length) {
+    if (done % PROGRESS_INTERVAL === 0 || done === files.length) {
       postMessage({ type: 'progress', done, total: files.length });
     }
   }
