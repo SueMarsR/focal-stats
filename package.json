@@ -1,0 +1,20 @@
+{
+  "name": "focal-stats-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "build:cli": "tsup --config packages/cli/tsup.config.ts",
+    "build:web": "vite build packages/web"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.8",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
+  }
+}

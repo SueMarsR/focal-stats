@@ -1,0 +1,17 @@
+{
+  "name": "@focal-stats/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "exifreader": "^4.40.5"
+  },
+  "devDependencies": {
+    "piexifjs": "^1.0.6",
+    "sharp": "^0.34.5"
+  }
+}

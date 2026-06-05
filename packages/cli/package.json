@@ -1,0 +1,7 @@
+{
+  "name": "@focal-stats/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": { "focal-stats": "./dist/index.js" },
+  "dependencies": { "@focal-stats/core": "*" }
+}
