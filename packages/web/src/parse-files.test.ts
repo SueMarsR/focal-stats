@@ -7,7 +7,7 @@ const fixtureBytes = readFileSync(
 );
 
 function makeFile(bytes: Uint8Array, name: string): File {
-  return new File([bytes], name);
+  return new File([new Uint8Array(bytes)], name);
 }
 
 describe('parseFiles', () => {

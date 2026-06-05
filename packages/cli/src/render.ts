@@ -9,6 +9,11 @@ export function renderText(stats: FocalStats): string {
   const unit = stats.mode === 'equiv35' ? 'mm(等效)' : 'mm';
   const lines: string[] = [];
   lines.push(`扫描 ${stats.scanned} 文件 · ${stats.total} 张含焦段 · 跳过 ${stats.skipped.length}`);
+  if (stats.total === 0) {
+    lines.push('', '洞察:');
+    for (const i of stats.insights) lines.push(`  • ${i.message}`);
+    return lines.join('\n');
+  }
   lines.push('', `焦段分布（${unit}）:`);
   for (const b of stats.buckets) {
     lines.push(`  ${b.label.padStart(8)} | ${bar(b.percentage)} ${b.percentage}% (${b.count})`);

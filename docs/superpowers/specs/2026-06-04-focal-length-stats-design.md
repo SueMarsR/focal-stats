@@ -158,7 +158,7 @@ interface AnalyzeConfig {
   - `--buckets 16,24,35,50,70,100,200`（① 自定义分桶）
   - `--lens "24-70"` / `--camera "A7"`（③ 筛选）
   - `--prime-threshold 0.6` / `--top 3`（④）
-  - `--config focal-stats.config.json`（从文件读全部配置）
+  - `--config focal-stats.config.json`（从文件读全部配置）— **后续增强，v1 未实现**
   - `--header-bytes 1048576`（性能旋钮）
 
 ## 7. `web` 包（GitHub Pages）
@@ -225,6 +225,7 @@ interface AnalyzeConfig {
 - 写入 / 修改 EXIF。
 - 云端上传、账号体系。
 - 移动原生 App。
+- CLI 配置文件 `--config`（v1 仅支持命令行参数；配置文件读取为后续增强）。
 
 ## 15. 里程碑/分期
 

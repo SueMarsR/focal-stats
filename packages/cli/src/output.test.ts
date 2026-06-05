@@ -26,4 +26,10 @@ describe('output', () => {
   it('toHtml 是完整 HTML 文档', () => {
     expect(toHtml(stats)).toMatch(/^<!doctype html>/);
   });
+  it('renderText 空数据不画空直方图', () => {
+    const empty = analyze([], DEFAULT_CONFIG);
+    const out = renderText(empty);
+    expect(out).not.toMatch(/焦段分布/);
+    expect(out).toMatch(/未发现/);
+  });
 });
