@@ -22,4 +22,7 @@ describe('config', () => {
   it('topN 非正整数抛错', () => {
     expect(() => parseConfig({ topN: 0 })).toThrow(/topN/);
   });
+  it('零值边界抛错', () => {
+    expect(() => parseConfig({ bucketBoundaries: [0, 24] })).toThrow(/正数/);
+  });
 });

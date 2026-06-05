@@ -17,4 +17,9 @@ describe('bucketize', () => {
     expect(buckets[0].count).toBe(0);
     expect(buckets[1].count).toBe(1);
   });
+  it('值等于下界 0 归入首桶', () => {
+    const buckets = bucketize([0], [24]);
+    expect(buckets[0].count).toBe(1); // [0,24)
+    expect(buckets[0].label).toBe('0–24'); // en-dash U+2013
+  });
 });

@@ -22,4 +22,8 @@ describe('normalizeFocal', () => {
     expect(normalizeFocal({ ...base, focalLength: null, focalLength35mm: null }, 'equiv35'))
       .toEqual({ focal: null, fellBack: false });
   });
+  it('raw 模式焦距缺失返回 null', () => {
+    expect(normalizeFocal({ ...base, focalLength: null }, 'raw'))
+      .toEqual({ focal: null, fellBack: false });
+  });
 });
