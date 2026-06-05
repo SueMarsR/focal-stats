@@ -13,7 +13,7 @@ describe('analyze', () => {
     const stats = analyze([p(35), p(35)], DEFAULT_CONFIG, pre);
     expect(stats.total).toBe(2);
     expect(stats.scanned).toBe(3);
-    expect(stats.skipped).toContainEqual({ name: 'broken.cr2', reason: 'parse-error' });
+    expect(stats.skipped).toEqual([{ name: 'broken.cr2', reason: 'parse-error' }]);
     expect(stats.insights.length).toBeGreaterThan(0);
   });
 });

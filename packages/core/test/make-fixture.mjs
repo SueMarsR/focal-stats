@@ -1,3 +1,7 @@
+// Regenerates the committed test fixture packages/core/test/fixtures/sample.jpg.
+// Requires dev dependencies `sharp` and `piexifjs` (a full `npm install`, not --omit=dev).
+// Run from repo root: node packages/core/test/make-fixture.mjs
+// The generated sample.jpg is committed, so tests and CI never run this script.
 import { writeFileSync } from 'node:fs';
 import sharp from 'sharp';
 import piexif from 'piexifjs';

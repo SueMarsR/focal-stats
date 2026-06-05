@@ -27,16 +27,17 @@ function str(tag: Tag): string | null {
 }
 
 const round = (n: number | null): number | null => (n == null ? null : Math.round(n));
+const positive = (n: number | null): number | null => (n != null && n > 0 ? n : null);
 
 export function mapTags(tags: Tags, name: string): PhotoExif {
   return {
     name,
-    focalLength: round(num(tags.FocalLength)),
-    focalLength35mm: round(num(tags.FocalLengthIn35mmFilm) ?? num(tags.FocalLengthIn35mmFormat)),
+    focalLength: positive(round(num(tags.FocalLength))),
+    focalLength35mm: positive(round(num(tags.FocalLengthIn35mmFilm) ?? num(tags.FocalLengthIn35mmFormat))),
     lensModel: str(tags.LensModel) ?? str(tags.Lens),
     cameraMake: str(tags.Make),
     cameraModel: str(tags.Model),
-    fNumber: num(tags.FNumber),
+    fNumber: positive(num(tags.FNumber)),
   };
 }
 

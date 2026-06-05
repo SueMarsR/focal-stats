@@ -34,6 +34,32 @@ describe('mapTags', () => {
     const photo = mapTags({ FocalLengthIn35mmFormat: { value: 75 } }, 'c.jpg');
     expect(photo.focalLength35mm).toBe(75);
   });
+
+  it('num() 接受纯字符串数值（如 XMP 来源）', () => {
+    expect(mapTags({ FocalLength: { value: '85' } }, 'd.jpg').focalLength).toBe(85);
+  });
+
+  it('num() 分母为 0 时返回 null', () => {
+    expect(mapTags({ FNumber: { value: [0, 0], description: 'f/2.8' } }, 'e.jpg').fNumber).toBeNull();
+  });
+
+  it('num() value 穷尽后回退到 description 数字', () => {
+    expect(mapTags({ FocalLength: { value: undefined, description: '135 mm' } }, 'f.jpg').focalLength).toBe(135);
+  });
+
+  it('str() 无 description 时用 value 字符串', () => {
+    expect(mapTags({ LensModel: { value: 'Sigma 85' } }, 'g.jpg').lensModel).toBe('Sigma 85');
+  });
+
+  it('str() 数组 value 以空格连接', () => {
+    expect(mapTags({ Make: { value: ['FUJI', 'FILM'] } }, 'h.jpg').cameraMake).toBe('FUJI FILM');
+  });
+
+  it('焦距为 0（未知哨兵）视为 null', () => {
+    const photo = mapTags({ FocalLength: { value: 0 }, FocalLengthIn35mmFilm: { value: 0 } }, 'z.jpg');
+    expect(photo.focalLength).toBeNull();
+    expect(photo.focalLength35mm).toBeNull();
+  });
 });
 
 describe('extractExif (集成)', () => {
