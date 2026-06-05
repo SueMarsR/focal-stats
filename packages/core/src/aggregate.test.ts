@@ -49,4 +49,27 @@ describe('aggregate', () => {
     expect(s.equivFallbackCount).toBe(1);
     expect(s.total).toBe(1);
   });
+
+  it('按机身分组', () => {
+    const s = aggregate(photos, DEFAULT_CONFIG);
+    expect(s.byCamera).toEqual([
+      { key: 'C1', count: 2, topFocal: 35 },
+      { key: 'C2', count: 1, topFocal: 50 },
+    ]);
+  });
+
+  it('镜头为 null 归入未知组', () => {
+    const p = [photo({ name: '1', focalLength35mm: 35, lensModel: null })];
+    const s = aggregate(p, DEFAULT_CONFIG);
+    expect(s.byLens).toEqual([{ key: '未知', count: 1, topFocal: 35 }]);
+  });
+
+  it('分组计数相同时按 key 字典序排序', () => {
+    const p = [
+      photo({ focalLength35mm: 35, lensModel: 'Zeta' }),
+      photo({ focalLength35mm: 50, lensModel: 'Alpha' }),
+    ];
+    const s = aggregate(p, DEFAULT_CONFIG);
+    expect(s.byLens.map((g) => g.key)).toEqual(['Alpha', 'Zeta']);
+  });
 });

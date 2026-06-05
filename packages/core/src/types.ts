@@ -28,7 +28,7 @@ export interface GroupStat {
 }
 
 export interface Insight {
-  type: 'most-used' | 'prime-suggestion' | 'concentration';
+  type: 'most-used' | 'prime-suggestion' | 'concentration' | 'data-quality';
   message: string;
   data?: Record<string, unknown>;
 }

@@ -32,4 +32,23 @@ describe('generateInsights', () => {
     const ins = generateInsights(stats, DEFAULT_CONFIG);
     expect(ins[0].message).toMatch(/未发现/);
   });
+
+  it('equiv35 回退时产出 data-quality 提示', () => {
+    const stats = aggregate(
+      [{ name: 'x', focalLength: 35, focalLength35mm: null,
+         lensModel: null, cameraMake: null, cameraModel: null, fNumber: null }],
+      DEFAULT_CONFIG,
+    );
+    const ins = generateInsights(stats, DEFAULT_CONFIG);
+    expect(ins.some((i) => i.type === 'data-quality')).toBe(true);
+  });
+
+  it('开放桶 200+ 定焦建议中点取下界', () => {
+    const stats = aggregate(Array.from({ length: 5 }, () => photo(300)), DEFAULT_CONFIG);
+    const ins = generateInsights(stats, DEFAULT_CONFIG);
+    const prime = ins.find((i) => i.type === 'prime-suggestion');
+    expect(prime).toBeDefined();
+    expect(prime!.message).toContain('200+');
+    expect(prime!.message).toContain('200mm');
+  });
 });

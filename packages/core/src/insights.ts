@@ -19,6 +19,8 @@ export function generateInsights(
 
   const topBucket = [...stats.buckets].sort((a, b) => b.count - a.count)[0];
   if (topBucket && topBucket.percentage / 100 >= config.primeThreshold) {
+    // For the open-ended top bucket (e.g. "200+"), the midpoint is undefined;
+    // we use its lower bound as a reasonable prime entry-point suggestion.
     const mid =
       topBucket.max === Infinity
         ? topBucket.min
@@ -39,7 +41,7 @@ export function generateInsights(
 
   if (stats.equivFallbackCount > 0) {
     insights.push({
-      type: 'concentration',
+      type: 'data-quality',
       message: `注意：${stats.equivFallbackCount} 张照片无 35mm 等效信息，已按原始焦距计入。`,
     });
   }

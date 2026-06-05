@@ -20,17 +20,22 @@ function groupBy(entries: { key: string | null; focal: number }[]): GroupStat[] 
   const map = new Map<string, number[]>();
   for (const e of entries) {
     const key = e.key ?? '未知';
-    map.set(key, [...(map.get(key) ?? []), e.focal]);
+    const arr = map.get(key);
+    if (arr) arr.push(e.focal);
+    else map.set(key, [e.focal]);
   }
   return [...map.entries()]
     .map(([key, focals]) => ({ key, count: focals.length, topFocal: countTop(focals)[0].focal }))
-    .sort((a, b) => b.count - a.count);
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
 }
 
 export function aggregate(
   photos: PhotoExif[],
   config: AnalyzeConfig,
 ): Omit<FocalStats, 'insights'> {
+  // Filters narrow analysis scope. `skipped` only reports data-quality issues
+  // (no focal length) among filter-passing photos; photos excluded by an active
+  // filter are out of scope by user intent and are not counted in `skipped`.
   const filtered = photos.filter(
     (p) =>
       matchesFilter(p.lensModel, config.filterLens) &&
