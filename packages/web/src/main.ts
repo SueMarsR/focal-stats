@@ -195,6 +195,8 @@ function onPickFiles(ev: Event): void {
   if (files.length === 0) return;
   runWorker({ kind: 'files', files, headerBytes: HEADER_BYTES }, files.length, '文件');
 }
+$('btn-folder').addEventListener('click', () => $('picker-folder').click());
+$('btn-photos').addEventListener('click', () => $('picker-photos').click());
 $('picker-folder').addEventListener('change', onPickFiles);
 $('picker-photos').addEventListener('change', onPickFiles);
 
