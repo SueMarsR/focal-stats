@@ -13,7 +13,10 @@ const AMBER = '#e0a64d';
 const TEXT = '#e7e7ea';
 const MUTED = '#8a8d93';
 const BORDER = '#2c3036';
-const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif';
+// Single-quote multi-word family names: this string goes into a double-quoted SVG
+// attribute (font-family="..."), and embedded double quotes would terminate the
+// attribute → invalid XML → the card fails to load as an <img> for rasterization.
+const SANS = "system-ui,-apple-system,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif";
 const MONO = 'ui-monospace,SFMono-Regular,Menlo,monospace';
 
 const DEFAULT_URL = 'suemarsr.github.io/focal-stats';

@@ -35,6 +35,15 @@ describe('shareCardSvg', () => {
     expect(svg).toContain('focal-stats');
   });
 
+  it('是合法 XML（能作为 <img> 光栅化）：属性值内无裸双引号', () => {
+    const svg = shareCardSvg(stats);
+    // Strip every well-formed key="value" attribute (whose value has no "). A well-formed
+    // SVG whose text holds no double-quote leaves none behind. A font stack with embedded
+    // double quotes — the bug that broke the share image — leaks a stray " here.
+    const leftover = svg.replace(/\s[\w:-]+="[^"]*"/g, '');
+    expect(leftover).not.toContain('"');
+  });
+
   it('含 hero 焦段、占比与模式标签', () => {
     const svg = shareCardSvg(stats);
     expect(svg).toContain('hero-num');
