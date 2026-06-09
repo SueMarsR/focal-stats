@@ -58,6 +58,12 @@ describe('shareCardSvg', () => {
     expect((svg.match(/class="bar"/g) ?? []).length).toBe(stats.buckets.length);
   });
 
+  it('内嵌直方图用自包含内联颜色（光栅化时无 CSS，类样式会失色）', () => {
+    const svg = shareCardSvg(stats);
+    expect(svg).toContain('fill="#23262c"'); // track color — only the chart uses it
+    expect(svg).toContain('fill="#f0b95e"'); // top-bucket bar highlight
+  });
+
   it('含主力机身与镜头', () => {
     const svg = shareCardSvg(stats);
     expect(svg).toContain('ILCE-7M4');
