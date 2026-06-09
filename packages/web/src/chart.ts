@@ -1,9 +1,9 @@
 import type { FocalStats } from '@focal-stats/core';
 import { escHtml } from './utils';
 
-const LABEL_WIDTH = 130; // px reserved for the left label column + right value margin
-const BAR_X = 70;        // x-origin of bars
-const BAR_LABEL_GAP = 8; // gap between bar end and its value text
+const BAR_X = 70;             // x-origin of bars (left label column is 0..BAR_X)
+const VALUE_COL_WIDTH = 100;  // px reserved on the right for the "100% (count)" text
+const BAR_LABEL_GAP = 8;      // gap between bar end and its value text
 const TRACK_FILL = '#23262c';
 const BAR_FILL = '#e0a64d';
 const BAR_TOP_FILL = '#f0b95e'; // brighter amber for the most-used bucket
@@ -13,7 +13,7 @@ const MONO = 'ui-monospace,SFMono-Regular,Menlo,monospace';
 
 export function barChartSvg(stats: FocalStats, width = 600, barH = 30): string {
   const max = Math.max(1, ...stats.buckets.map((b) => b.count));
-  const trackW = width - LABEL_WIDTH;
+  const trackW = width - BAR_X - VALUE_COL_WIDTH;
   const rows = stats.buckets
     .map((b, i) => {
       const w = Math.round((b.count / max) * trackW);

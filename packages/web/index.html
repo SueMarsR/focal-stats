@@ -6,8 +6,8 @@
     <title>焦段统计 · Focal Stats</title>
     <style>
       :root {
-        --bg: #16181c; --panel: #1f2228; --border: #2c3036;
-        --text: #e7e7ea; --muted: #8a8d93; --amber: #e0a64d; --amber-hi: #f0b95e;
+        --bg: #16181c; --panel: #1f2228; --panel-hover: #21252c; --border: #2c3036;
+        --text: #e7e7ea; --muted: #8a8d93; --amber: #e0a64d;
       }
       * { box-sizing: border-box; }
       body {
@@ -32,7 +32,8 @@
         background: var(--panel); padding: 2rem 1rem; margin: 1.5rem 0;
         transition: border-color .2s, background .2s;
       }
-      .dropzone:hover { border-color: var(--amber); background: #21252c; }
+      .dropzone:hover { border-color: var(--amber); background: var(--panel-hover); }
+      .dropzone:focus-within { border-color: var(--amber); outline: 2px solid var(--amber); outline-offset: 2px; }
       .dropzone .icon { font-size: 1.6rem; color: var(--amber); }
       .dropzone .main { font-size: 1rem; color: var(--text); }
       .dropzone .sub { font-size: .8rem; color: var(--muted); }
@@ -69,7 +70,7 @@
       @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
       @media (prefers-reduced-motion: reduce) { #chart .bar { animation: none; } }
 
-      #insights h2 { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 1.5rem 0 .75rem; }
+      #insights .panel-title { margin: 1.5rem 0 .75rem; }
       .card {
         background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--amber);
         border-radius: 8px; padding: .7rem 1rem; margin: .55rem 0; font-size: .92rem; color: var(--text);
@@ -88,7 +89,7 @@
     </header>
 
     <label class="dropzone" for="picker">
-      <span class="icon">📂</span>
+      <span class="icon" aria-hidden="true">📂</span>
       <span class="main">点击选择文件夹</span>
       <span class="sub">支持 JPEG 与 RAW（CR2/NEF/ARW/DNG…）· 只读文件头，不上传</span>
       <input id="picker" class="visually-hidden" type="file" webkitdirectory multiple aria-label="选择 SD 卡文件夹" />
