@@ -3,3 +3,7 @@ dist/
 coverage/
 *.log
 .DS_Store
+
+# 本地个人笔记 / 工具状态，勿入公开仓库
+.claude/
+TODO.md
