@@ -21,3 +21,4 @@ export { DEFAULT_CONFIG, parseConfig, validateConfig } from './config';
 export { extractExif, mapTags } from './exif';
 export { aggregate } from './aggregate';
 export { generateInsights } from './insights';
+export { representativeFocal, type Representative } from './representative';

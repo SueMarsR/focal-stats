@@ -1,4 +1,4 @@
-import { analyze, parseConfig } from '@focal-stats/core';
+import { analyze, parseConfig, representativeFocal } from '@focal-stats/core';
 import type { AnalyzeConfig, FocalStats, PhotoExif, SkippedFile } from '@focal-stats/core';
 import { barChartSvg } from './chart';
 import { parseStoredConfig, serializeConfig } from './settings';
@@ -53,12 +53,12 @@ function render(photos: PhotoExif[], skipped: SkippedFile[]): void {
   const stats = analyze(photos, config, skipped);
   lastStats = stats;
   document.getElementById('share-row')!.style.display = stats.total > 0 ? '' : 'none';
-  if (stats.total > 0 && stats.topFocal[0]) {
-    const top = stats.topFocal[0];
+  const rep = representativeFocal(stats);
+  if (stats.total > 0 && rep) {
     const modeLabel = stats.mode === 'equiv35' ? '35mm 等效' : '原始焦距';
     hero.innerHTML =
-      `<div class="hero-num">${top.focal}<span class="hero-unit">mm</span></div>` +
-      `<div class="hero-label">最常用焦段 · ${modeLabel} · ${top.percentage}% / ${top.count} 张</div>`;
+      `<div class="hero-num">${rep.focal}<span class="hero-unit">mm</span></div>` +
+      `<div class="hero-label">最常用焦段 · ${modeLabel} · ${rep.percentage}% / ${rep.count} 张</div>`;
     hero.style.display = '';
   } else {
     hero.innerHTML = '';
