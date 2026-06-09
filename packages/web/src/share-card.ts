@@ -1,6 +1,6 @@
 import type { FocalStats, GroupStat } from '@focal-stats/core';
 import { representativeFocal, detectBrand, detectBodyType } from '@focal-stats/core';
-import { barChartSvg } from './chart';
+import { barChartSvg, type ChartColors } from './chart';
 import { BRAND_ICONS, type IconGlyph } from './brand-icons';
 import { BODY_GLYPHS } from './body-glyphs';
 import { escHtml } from './utils';
@@ -27,6 +27,16 @@ const UNKNOWN = '未知';
 
 const CHART_Y = 430;
 const BAR_H = 44;
+// The card is always dark and rasterized without a stylesheet, so the embedded chart
+// must carry its own colors (the in-page chart's CSS classes don't apply here).
+const CARD_CHART_COLORS: ChartColors = {
+  label: '#cfd2d8',
+  value: MUTED,
+  track: '#23262c',
+  bar: AMBER,
+  barTop: '#f0b95e',
+  font: MONO,
+};
 const ICON = 34; // device glyph box (square)
 const LINE_H = 56; // device line vertical pitch (icons are taller than the text)
 const DISCLAIMER = '品牌名称与标识为各自所有者的商标';
@@ -141,7 +151,7 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
     `<text x="${PAD}" y="372" font-size="30" fill="${MUTED}" font-family="${SANS}">最常用 · ${modeLabel} · ${heroPct}% · ${heroCount} 张</text>`,
 
     // Histogram (reuse barChartSvg, nested at content width)
-    `<svg x="${PAD}" y="${CHART_Y}" width="${chartW}" height="${chartH}">${barChartSvg(stats, chartW, BAR_H)}</svg>`,
+    `<svg x="${PAD}" y="${CHART_Y}" width="${chartW}" height="${chartH}">${barChartSvg(stats, chartW, BAR_H, CARD_CHART_COLORS)}</svg>`,
 
     // Device block
     ...deviceLines,

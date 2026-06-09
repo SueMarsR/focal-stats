@@ -132,14 +132,12 @@ function isHttpUrl(s: string): boolean {
 /** Rasterize an SVG string to a PNG Blob at `scale`× for a crisp share image. */
 function svgToPng(svg: string, w: number, h: number, scale = 2): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const objUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = w * scale;
       canvas.height = h * scale;
       const ctx = canvas.getContext('2d');
-      URL.revokeObjectURL(objUrl);
       if (!ctx) {
         reject(new Error('无法创建画布'));
         return;
@@ -147,11 +145,11 @@ function svgToPng(svg: string, w: number, h: number, scale = 2): Promise<Blob> {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('导出 PNG 失败'))), 'image/png');
     };
-    img.onerror = () => {
-      URL.revokeObjectURL(objUrl);
-      reject(new Error('卡片渲染失败'));
-    };
-    img.src = objUrl;
+    img.onerror = () => reject(new Error('卡片渲染失败'));
+    // UTF-8 data URL, NOT a blob: URL — iOS Safari (WebKit) fails to load an SVG
+    // served from a blob into <img> for canvas rasterization (works in Chrome).
+    // encodeURIComponent, NOT btoa: the card has non-Latin1 text (Chinese labels).
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   });
 }
 
