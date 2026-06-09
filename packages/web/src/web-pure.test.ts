@@ -14,7 +14,8 @@ describe('barChartSvg', () => {
     const stats = analyze([p(35), p(50)], DEFAULT_CONFIG);
     const svg = barChartSvg(stats);
     expect(svg.startsWith('<svg')).toBe(true);
-    expect((svg.match(/<rect/g) ?? []).length).toBe(stats.buckets.length);
+    expect((svg.match(/class="bar"/g) ?? []).length).toBe(stats.buckets.length);
+    expect((svg.match(/class="track"/g) ?? []).length).toBe(stats.buckets.length);
   });
 });
 

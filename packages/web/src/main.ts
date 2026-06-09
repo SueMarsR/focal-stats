@@ -38,10 +38,25 @@ function render(photos: PhotoExif[], skipped: SkippedFile[]): void {
       `配置错误：${err instanceof Error ? err.message : String(err)}`;
     document.getElementById('chart')!.innerHTML = '';
     document.getElementById('insights')!.innerHTML = '';
+    const hero = document.getElementById('hero')!;
+    hero.innerHTML = '';
+    hero.style.display = 'none';
     return;
   }
   localStorage.setItem('focal-stats-config', serializeConfig(config));
   const stats = analyze(photos, config, skipped);
+  const hero = document.getElementById('hero')!;
+  if (stats.total > 0 && stats.topFocal[0]) {
+    const top = stats.topFocal[0];
+    const modeLabel = stats.mode === 'equiv35' ? '35mm 等效' : '原始焦距';
+    hero.innerHTML =
+      `<div class="hero-num">${top.focal}<span class="hero-unit">mm</span></div>` +
+      `<div class="hero-label">最常用焦段 · ${modeLabel} · ${top.percentage}% / ${top.count} 张</div>`;
+    hero.style.display = '';
+  } else {
+    hero.innerHTML = '';
+    hero.style.display = 'none';
+  }
   document.getElementById('chart')!.innerHTML = barChartSvg(stats);
   document.getElementById('insights')!.innerHTML =
     '<h2>洞察</h2>' + stats.insights.map((i) => `<div class="card">${escHtml(i.message)}</div>`).join('');
