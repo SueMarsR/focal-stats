@@ -1,0 +1,9 @@
+// QR code for https://suemarsr.github.io/focal-stats/ — generated once with the
+// `qrcode` npm package (EC level M) and bundled as an inline stroke path, so the
+// share card stays fully self-contained (no runtime dependency, no network fetch).
+// 37x37 modules including the 4-module quiet zone. Dark modules are drawn as
+// 1-unit-tall horizontal strokes (stroke-width 1) at y+0.5 with crispEdges.
+export const SITE_QR = {
+  modules: 37,
+  path: "M4 4.5h7m7 0h1m1 0h1m1 0h3m1 0h7M4 5.5h1m5 0h1m3 0h3m1 0h5m1 0h1m1 0h1m5 0h1M4 6.5h1m1 0h3m1 0h1m1 0h1m3 0h1m2 0h1m2 0h1m1 0h1m1 0h1m1 0h3m1 0h1M4 7.5h1m1 0h3m1 0h1m1 0h2m3 0h3m1 0h2m1 0h1m1 0h1m1 0h3m1 0h1M4 8.5h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h5m1 0h1m1 0h3m1 0h1M4 9.5h1m5 0h1m1 0h4m1 0h1m1 0h1m1 0h1m4 0h1m5 0h1M4 10.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M12 11.5h1m5 0h3m1 0h1M4 12.5h1m1 0h5m3 0h1m2 0h1m1 0h3m1 0h1m2 0h5M6 13.5h1m4 0h1m3 0h3m2 0h9m3 0h1M5 14.5h3m1 0h3m1 0h1m1 0h6m1 0h1m2 0h1m1 0h2M9 15.5h1m2 0h1m1 0h2m2 0h1m5 0h1m2 0h1m1 0h1m1 0h1M4 16.5h2m3 0h5m5 0h3m2 0h1m4 0h2M4 17.5h3m5 0h1m2 0h3m2 0h5m1 0h3m3 0h1M5 18.5h1m1 0h1m1 0h2m2 0h1m3 0h5m2 0h2m1 0h4M5 19.5h2m1 0h2m1 0h1m1 0h1m1 0h3m1 0h2m4 0h4m2 0h1M4 20.5h1m2 0h1m2 0h2m1 0h3m2 0h1m2 0h3m5 0h2M4 21.5h1m2 0h1m1 0h1m1 0h1m1 0h1m1 0h1m5 0h4m1 0h3m1 0h1m1 0h1M4 22.5h1m1 0h2m2 0h1m1 0h2m1 0h1m3 0h1m1 0h1m2 0h2m1 0h2m1 0h1M4 23.5h1m1 0h3m4 0h3m2 0h3m2 0h2m1 0h3m2 0h1M4 24.5h1m1 0h2m1 0h2m2 0h1m2 0h1m4 0h1m2 0h5m1 0h3M12 25.5h3m1 0h3m1 0h1m1 0h1m1 0h1m3 0h5M4 26.5h7m2 0h1m1 0h1m1 0h5m1 0h2m1 0h1m1 0h3M4 27.5h1m5 0h1m1 0h2m2 0h2m1 0h1m2 0h3m3 0h1m3 0h1M4 28.5h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h2m1 0h1m2 0h5m1 0h1M4 29.5h1m1 0h3m1 0h1m1 0h2m1 0h1m4 0h3m1 0h1m2 0h1m1 0h4M4 30.5h1m1 0h3m1 0h1m1 0h2m3 0h5m1 0h2m1 0h6M4 31.5h1m5 0h1m2 0h6m5 0h2m1 0h1m1 0h1m1 0h1M4 32.5h7m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m3 0h2m1 0h3",
+};
