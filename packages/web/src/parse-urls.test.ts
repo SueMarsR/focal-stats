@@ -72,4 +72,22 @@ describe('parseUrls', () => {
     expect(cancelled).toBe(true);
     expect(skipped).toHaveLength(1); // 0x07 bytes aren't valid EXIF
   });
+
+  it('为每个请求传入 AbortSignal（超时保护，避免单个 URL 卡死整批）', async () => {
+    let seenSignal: AbortSignal | undefined;
+    const fetchFn: FetchLike = async (_u, init) => {
+      seenSignal = init?.signal;
+      return new Response(fixtureBytes, { status: 200 });
+    };
+    await parseUrls(['https://h/a.jpg'], 1024 * 1024, undefined, fetchFn);
+    expect(seenSignal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('body 为 null 时回退到 arrayBuffer 并解析', async () => {
+    const fetchFn: FetchLike = async () =>
+      ({ ok: true, body: null, arrayBuffer: async () => fixtureBytes.buffer } as unknown as Response);
+    const { photos } = await parseUrls(['https://h/n.jpg'], 1024 * 1024, undefined, fetchFn);
+    expect(photos).toHaveLength(1);
+    expect(photos[0].focalLength35mm).toBe(52);
+  });
 });

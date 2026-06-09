@@ -5,7 +5,7 @@ import type { ParseProgress, ParseResult } from './parse-files';
 
 export type FetchLike = (
   input: string,
-  init?: { headers?: Record<string, string> },
+  init?: { headers?: Record<string, string>; signal?: AbortSignal },
 ) => Promise<Response>;
 
 /** Decoded last non-empty path segment of a URL; query/hash stripped. Falls back to the raw string. */
@@ -50,14 +50,17 @@ async function readCappedBody(res: Response, headerBytes: number): Promise<Array
 /**
  * Fetch each URL's first `headerBytes` (where EXIF lives) and parse it with the same
  * `extractExif` used for local files. Never throws: network/CORS failures become
- * `fetch-error`, non-2xx become `http-error`. Reports progress every PROGRESS_INTERVAL
- * URLs and once at the end. `fetchFn` is injectable for testing.
+ * `fetch-error`, non-2xx become `http-error`. Each request is bounded by `timeoutMs`
+ * via AbortSignal, so one stalled URL aborts to a `fetch-error` skip instead of blocking
+ * the rest of the batch. Reports progress every PROGRESS_INTERVAL URLs and once at the
+ * end. `fetchFn` is injectable for testing.
  */
 export async function parseUrls(
   urls: string[],
   headerBytes: number,
   onProgress?: (p: ParseProgress) => void,
   fetchFn: FetchLike = (input, init) => fetch(input, init),
+  timeoutMs = 20000,
 ): Promise<ParseResult> {
   const photos: PhotoExif[] = [];
   const skipped: SkippedFile[] = [];
@@ -65,7 +68,10 @@ export async function parseUrls(
   for (const url of urls) {
     const name = fileNameFromUrl(url);
     try {
-      const res = await fetchFn(url, { headers: { Range: `bytes=0-${headerBytes - 1}` } });
+      const res = await fetchFn(url, {
+        headers: { Range: `bytes=0-${headerBytes - 1}` },
+        signal: AbortSignal.timeout(timeoutMs),
+      });
       if (!res.ok) {
         skipped.push({ name, reason: 'http-error' });
       } else {
