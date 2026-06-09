@@ -94,6 +94,14 @@
       }
       #parse-urls:hover { background: var(--amber-hi, #f0b95e); }
       .url-hint { font-size: .75rem; color: var(--muted); margin: .5rem 0 0; }
+
+      #share-row { margin: 0 0 1.5rem; }
+      #share-card {
+        background: var(--amber); color: var(--bg); border: none;
+        border-radius: 8px; padding: .6rem 1.1rem; font-weight: 600; font-size: .95rem; cursor: pointer;
+      }
+      #share-card:hover { background: var(--amber-hi, #f0b95e); }
+      .share-hint { font-size: .75rem; color: var(--muted); margin: .5rem 0 0; }
     </style>
   </head>
   <body>
@@ -122,6 +130,11 @@
     <p id="status" class="status"></p>
     <div id="chart" class="chart"></div>
     <div id="insights"></div>
+
+    <div id="share-row" style="display:none">
+      <button id="share-card" type="button">📸 生成分享卡片 · Share card</button>
+      <p class="share-hint">导出一张「镜头画像」长图，分享到小红书 / Instagram。卡片只含机身/镜头型号，不含原图。</p>
+    </div>
 
     <section class="panel">
       <h2 class="panel-title">设置 · Settings</h2>
