@@ -79,6 +79,21 @@
       footer { margin-top: 2.5rem; color: var(--muted); font-size: .8rem; }
       footer a { color: var(--amber); text-decoration: none; }
       footer a:hover { text-decoration: underline; }
+
+      .url-input { margin: 0 0 1.5rem; }
+      .url-label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .4rem; }
+      #urls {
+        width: 100%; background: var(--panel); color: var(--text);
+        border: 1px solid var(--border); border-radius: 8px; padding: .6rem .7rem;
+        font-family: inherit; font-size: .85rem; resize: vertical;
+      }
+      #urls:focus { outline: none; border-color: var(--amber); }
+      #parse-urls {
+        margin-top: .5rem; background: var(--amber); color: var(--bg); border: none;
+        border-radius: 8px; padding: .5rem 1rem; font-weight: 600; cursor: pointer;
+      }
+      #parse-urls:hover { background: var(--amber-hi); }
+      .url-hint { font-size: .75rem; color: var(--muted); margin: .5rem 0 0; }
     </style>
   </head>
   <body>
@@ -94,6 +109,13 @@
       <span class="sub">支持 JPEG 与 RAW（CR2/NEF/ARW/DNG…）· 只读文件头，不上传</span>
       <input id="picker" class="visually-hidden" type="file" webkitdirectory multiple aria-label="选择 SD 卡文件夹" />
     </label>
+
+    <div class="url-input">
+      <label class="url-label" for="urls">或粘贴照片直链（每行一个）</label>
+      <textarea id="urls" rows="3" placeholder="https://example.com/DSCF1234.jpg" aria-label="照片直链，每行一个"></textarea>
+      <button id="parse-urls" type="button">解析链接</button>
+      <p class="url-hint">直链需允许跨域（CORS）；百度网盘 / iCloud 等分享链接通常无法直接读取。</p>
+    </div>
 
     <div id="hero" class="hero" style="display:none"></div>
 

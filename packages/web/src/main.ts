@@ -65,6 +65,10 @@ let lastPhotos: PhotoExif[] = [];
 let lastSkipped: SkippedFile[] = [];
 let currentWorker: Worker | null = null;
 
+type ParseRequest =
+  | { kind: 'files'; files: File[]; headerBytes: number }
+  | { kind: 'urls'; urls: string[]; headerBytes: number };
+
 function bindReRender(): void {
   for (const id of ['mode', 'buckets', 'lens', 'camera', 'threshold', 'topn']) {
     $(id).addEventListener('change', () => {
@@ -73,11 +77,9 @@ function bindReRender(): void {
   }
 }
 
-$('picker').addEventListener('change', async (ev) => {
-  const files = Array.from((ev.target as HTMLInputElement).files ?? []);
+function runWorker(payload: ParseRequest, count: number, noun: string): void {
   const status = document.getElementById('status')!;
-  if (files.length === 0) return;
-  status.textContent = `读取 ${files.length} 个文件…`;
+  status.textContent = `读取 ${count} 个${noun}…`;
 
   currentWorker?.terminate();
   const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
@@ -101,7 +103,35 @@ $('picker').addEventListener('change', async (ev) => {
     worker.terminate();
     if (currentWorker === worker) currentWorker = null;
   };
-  worker.postMessage({ files, headerBytes: HEADER_BYTES });
+  worker.postMessage(payload);
+}
+
+function isHttpUrl(s: string): boolean {
+  try {
+    const u = new URL(s);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+$('picker').addEventListener('change', (ev) => {
+  const files = Array.from((ev.target as HTMLInputElement).files ?? []);
+  if (files.length === 0) return;
+  runWorker({ kind: 'files', files, headerBytes: HEADER_BYTES }, files.length, '文件');
+});
+
+$('parse-urls').addEventListener('click', () => {
+  const urls = $<HTMLTextAreaElement>('urls')
+    .value.split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .filter(isHttpUrl);
+  if (urls.length === 0) {
+    document.getElementById('status')!.textContent = '没有有效的 http(s) 链接';
+    return;
+  }
+  runWorker({ kind: 'urls', urls, headerBytes: HEADER_BYTES }, urls.length, '链接');
 });
 
 loadFormFromStorage();

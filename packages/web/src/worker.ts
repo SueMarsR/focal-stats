@@ -1,14 +1,17 @@
 import { parseFiles } from './parse-files';
+import { parseUrls } from './parse-urls';
 
-interface ParseRequest {
-  files: File[];
-  headerBytes: number;
-}
+type ParseRequest =
+  | { kind: 'files'; files: File[]; headerBytes: number }
+  | { kind: 'urls'; urls: string[]; headerBytes: number };
 
 self.onmessage = async (e: MessageEvent<ParseRequest>) => {
-  const { files, headerBytes } = e.data;
-  const { photos, skipped } = await parseFiles(files, headerBytes, (p) =>
-    postMessage({ type: 'progress', done: p.done, total: p.total }),
-  );
+  const req = e.data;
+  const onProgress = (p: { done: number; total: number }) =>
+    postMessage({ type: 'progress', done: p.done, total: p.total });
+  const { photos, skipped } =
+    req.kind === 'files'
+      ? await parseFiles(req.files, req.headerBytes, onProgress)
+      : await parseUrls(req.urls, req.headerBytes, onProgress);
   postMessage({ type: 'done', photos, skipped });
 };
