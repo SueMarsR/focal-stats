@@ -1,4 +1,5 @@
 import type { AnalyzeConfig, FocalStats, Insight } from './types';
+import { representativeFocal } from './representative';
 
 export function generateInsights(
   stats: Omit<FocalStats, 'insights'>,
@@ -10,11 +11,13 @@ export function generateInsights(
 
   const insights: Insight[] = [];
   const unit = stats.mode === 'equiv35' ? 'mm 等效' : 'mm';
-  const top = stats.topFocal[0];
+  // Headline = the busiest bucket's most-common exact focal (a single number that sits
+  // on the histogram's peak), not the globally most-repeated focal which is noise for zoom.
+  const rep = representativeFocal(stats)!; // total > 0 above ⇒ at least one non-empty bucket
   insights.push({
     type: 'most-used',
-    message: `最常用焦段：${top.focal}${unit}（${top.count} 张，占 ${top.percentage}%）。`,
-    data: { focal: top.focal, count: top.count },
+    message: `最常用焦段：${rep.focal}${unit}（最集中区间 ${rep.bucketLabel}，占 ${rep.percentage}% / ${rep.count} 张）。`,
+    data: { focal: rep.focal, count: rep.count, percentage: rep.percentage },
   });
 
   const topBucket = [...stats.buckets].sort((a, b) => b.count - a.count)[0];

@@ -1,4 +1,5 @@
 import type { FocalStats, GroupStat } from '@focal-stats/core';
+import { representativeFocal } from '@focal-stats/core';
 import { barChartSvg } from './chart';
 import { escHtml } from './utils';
 
@@ -50,9 +51,10 @@ function deviceLine(icon: string, picked: { key: string; count: number }, unit: 
 export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): string {
   const url = opts.url ?? DEFAULT_URL;
   const modeLabel = stats.mode === 'equiv35' ? '35mm 等效' : '原始焦距';
-  const hero = stats.topFocal[0];
-  const heroFocal = hero ? hero.focal : 0;
-  const heroPct = hero ? hero.percentage : 0;
+  const rep = representativeFocal(stats);
+  const heroFocal = rep ? rep.focal : 0;
+  const heroPct = rep ? rep.percentage : 0;
+  const heroCount = rep ? rep.count : 0;
 
   // Histogram embedded as a nested <svg> at full content width.
   const chartW = W - PAD * 2;
@@ -89,7 +91,7 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
 
     // Hero
     `<text class="hero-num" x="${PAD}" y="310" font-size="190" fill="${AMBER}" font-family="${MONO}" font-weight="700">${heroFocal}<tspan font-size="64" fill="${MUTED}" dx="6">mm</tspan></text>`,
-    `<text x="${PAD}" y="372" font-size="30" fill="${MUTED}" font-family="${SANS}">最常用 · ${modeLabel} · ${heroPct}% · ${stats.total} 张</text>`,
+    `<text x="${PAD}" y="372" font-size="30" fill="${MUTED}" font-family="${SANS}">最常用 · ${modeLabel} · ${heroPct}% · ${heroCount} 张</text>`,
 
     // Histogram (reuse barChartSvg, nested at content width)
     `<svg x="${PAD}" y="${CHART_Y}" width="${chartW}" height="${chartH}">${barChartSvg(stats, chartW, BAR_H)}</svg>`,
