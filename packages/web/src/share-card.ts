@@ -11,11 +11,12 @@ const W = 900;
 const BASE_H = 1125;
 const PAD = 64;
 
-const BG = '#16181c';
-const AMBER = '#e0a64d';
-const TEXT = '#e7e7ea';
-const MUTED = '#8a8d93';
-const BORDER = '#2c3036';
+const BG = '#1c1c1e';
+const ACCENT = '#0a84ff';
+const ACCENT_BRIGHT = '#64d2ff';
+const TEXT = '#f5f5f7';
+const MUTED = '#98989d';
+const BORDER = '#2c2c2e';
 // Single-quote multi-word family names: this string goes into a double-quoted SVG
 // attribute (font-family="..."), and embedded double quotes would terminate the
 // attribute → invalid XML → the card fails to load as an <img> for rasterization.
@@ -32,9 +33,9 @@ const BAR_H = 44;
 const CARD_CHART_COLORS: ChartColors = {
   label: '#cfd2d8',
   value: MUTED,
-  track: '#23262c',
-  bar: AMBER,
-  barTop: '#f0b95e',
+  track: '#2c2c2e',
+  bar: ACCENT,
+  barTop: ACCENT_BRIGHT,
   font: MONO,
 };
 const ICON = 34; // device glyph box (square)
@@ -140,14 +141,15 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
   return [
     `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`,
     `<rect width="${W}" height="${H}" fill="${BG}"/>`,
+    `<defs><linearGradient id="card-hero-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${ACCENT}"/><stop offset="1" stop-color="${ACCENT_BRIGHT}"/></linearGradient></defs>`,
     `<rect x="16" y="16" width="${W - 32}" height="${H - 32}" rx="20" fill="none" stroke="${BORDER}" stroke-width="2"/>`,
 
     // Header
     `<text x="${PAD}" y="100" font-size="26" letter-spacing="6" fill="${MUTED}" font-family="${SANS}" font-weight="600">FOCAL STATS · 焦段统计</text>`,
-    `<rect x="${PAD}" y="120" width="72" height="4" rx="2" fill="${AMBER}"/>`,
+    `<rect x="${PAD}" y="120" width="72" height="4" rx="2" fill="${ACCENT}"/>`,
 
     // Hero
-    `<text class="hero-num" x="${PAD}" y="310" font-size="190" fill="${AMBER}" font-family="${MONO}" font-weight="700">${heroFocal}<tspan font-size="64" fill="${MUTED}" dx="6">mm</tspan></text>`,
+    `<text class="hero-num" x="${PAD}" y="310" font-size="190" fill="url(#card-hero-grad)" font-family="${MONO}" font-weight="700">${heroFocal}<tspan font-size="64" fill="${MUTED}" dx="6">mm</tspan></text>`,
     `<text x="${PAD}" y="372" font-size="30" fill="${MUTED}" font-family="${SANS}">最常用 · ${modeLabel} · ${heroPct}% · ${heroCount} 张</text>`,
 
     // Histogram (reuse barChartSvg, nested at content width)
