@@ -4,6 +4,7 @@ import type { PhotoExif } from '@focal-stats/core';
 import { shareCardSvg } from './share-card';
 import { BRAND_ICONS } from './brand-icons';
 import { BODY_GLYPHS } from './body-glyphs';
+import { SITE_QR } from './qr-code';
 
 const photo = (over: Partial<PhotoExif>): PhotoExif => ({
   name: 'x',
@@ -58,10 +59,19 @@ describe('shareCardSvg', () => {
     expect((svg.match(/class="bar"/g) ?? []).length).toBe(stats.buckets.length);
   });
 
-  it('内嵌直方图用自包含内联颜色（光栅化时无 CSS，类样式会失色）', () => {
+  it('内嵌直方图用自包含内联颜色，随主题切换（光栅化时无 CSS）', () => {
+    const dark = shareCardSvg(stats, { theme: 'dark' });
+    expect(dark).toContain('fill="#2c2c2e"'); // dark track — chart-only color
+    expect(dark).toContain('fill="#64d2ff"'); // dark top-bucket highlight
+    const light = shareCardSvg(stats, { theme: 'light' });
+    expect(light).toContain('fill="#e8e8ed"'); // light track
+    expect(light).toContain('fill="#0071e3"'); // light system-blue bar
+  });
+
+  it('右上角含网页二维码（内联自包含，带扫码提示）', () => {
     const svg = shareCardSvg(stats);
-    expect(svg).toContain('fill="#2c2c2e"'); // track color — only the chart uses it
-    expect(svg).toContain('fill="#64d2ff"'); // top-bucket bar highlight
+    expect(svg).toContain(SITE_QR.path); // QR modules embedded inline (no remote ref)
+    expect(svg).toContain('扫码访问');
   });
 
   it('含主力机身与镜头', () => {
@@ -77,7 +87,6 @@ describe('shareCardSvg', () => {
     expect(svg).not.toContain(BODY_GLYPHS.camera.path);
     expect(svg).not.toContain(BODY_GLYPHS.lens.path);
     expect(svg).not.toContain('未知');
-    expect(svg).not.toContain('品牌名称'); // no disclaimer when no device shown
   });
 
   it('主力机身渲染品牌图标 + 机身类型图标 + 镜头图标（Sony 有图标）', () => {
@@ -114,10 +123,6 @@ describe('shareCardSvg', () => {
     const svg = shareCardSvg(phone);
     expect(svg).toContain(BRAND_ICONS.apple!.path);
     expect(svg).toContain(BODY_GLYPHS.phone.path);
-  });
-
-  it('有品牌设备时展示商标免责声明', () => {
-    expect(shareCardSvg(stats)).toContain('品牌名称与标识为各自所有者的商标');
   });
 
   it('转义设备名中的 HTML 特殊字符', () => {
