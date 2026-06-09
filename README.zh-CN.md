@@ -7,11 +7,11 @@
 
 ## 截图
 
-| 选择文件夹 | 焦段统计结果 |
+| 浅色 | 深色 |
 |---|---|
-| ![空界面](docs/screenshots/empty.png) | ![统计结果](docs/screenshots/result.png) |
+| ![浅色](docs/screenshots/result-light.png) | ![深色](docs/screenshots/result-dark.png) |
 
-> 暗色「Lightroom」风格 · 最常用焦段 Hero 大数字 · 琥珀直方图（最常用桶高亮）· 截图等无焦段照片自动跳过。
+> Apple 风格：跟随系统浅/深自动切换 · 毛玻璃面板 · 系统蓝渐变大数字 · 最常用焦段高亮。
 
 ## 网页版
 部署在 GitHub Pages：选 SD 卡文件夹 → 即时看到焦段直方图与洞察。照片不离开浏览器。
