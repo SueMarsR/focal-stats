@@ -86,6 +86,7 @@ function runWorker(payload: ParseRequest, count: number, noun: string): void {
   currentWorker = worker;
 
   worker.onmessage = (e: MessageEvent) => {
+    if (currentWorker !== worker) return; // ignore a superseded worker's queued messages
     const d = e.data;
     if (d.type === 'progress') {
       status.textContent = `解析中 ${d.done}/${d.total}…`;
