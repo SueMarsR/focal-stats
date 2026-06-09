@@ -104,6 +104,13 @@
       }
       #share-card:hover { background: var(--amber-hi, #f0b95e); }
       .share-hint { font-size: .75rem; color: var(--muted); margin: .5rem 0 0; }
+
+      .demo-line { font-size: .85rem; color: var(--muted); margin: 0 0 1.5rem; }
+      .demo-btn {
+        background: none; border: none; padding: 0; cursor: pointer;
+        color: var(--amber); font: inherit; font-weight: 600; text-decoration: underline;
+      }
+      .demo-btn:hover { color: var(--amber-hi, #f0b95e); }
     </style>
   </head>
   <body>
@@ -134,6 +141,8 @@
       <button id="parse-urls" type="button">解析链接</button>
       <p class="url-hint">直链需允许跨域（CORS）；百度网盘 / iCloud 等分享链接通常无法直接读取。</p>
     </div>
+
+    <p class="demo-line">没有照片？<button id="demo" type="button" class="demo-btn">用示例数据看看 →</button></p>
 
     <div id="hero" class="hero" style="display:none"></div>
 
