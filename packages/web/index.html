@@ -37,6 +37,8 @@
       .dropzone .icon { font-size: 1.6rem; color: var(--amber); }
       .dropzone .main { font-size: 1rem; color: var(--text); }
       .dropzone .sub { font-size: .8rem; color: var(--muted); }
+      .pickers { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0; }
+      .pickers .dropzone { flex: 1 1 240px; margin: 0; }
       .visually-hidden {
         position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
         overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -111,12 +113,20 @@
       <p>选择 SD 卡 / 照片文件夹，统计你最常用的焦段。照片<strong>不会上传</strong>，全程浏览器本地解析 EXIF。</p>
     </header>
 
-    <label class="dropzone" for="picker">
-      <span class="icon" aria-hidden="true">📂</span>
-      <span class="main">点击选择文件夹</span>
-      <span class="sub">支持 JPEG 与 RAW（CR2/NEF/ARW/DNG…）· 只读文件头，不上传</span>
-      <input id="picker" class="visually-hidden" type="file" webkitdirectory multiple aria-label="选择 SD 卡文件夹" />
-    </label>
+    <div class="pickers">
+      <label class="dropzone" for="picker-folder">
+        <span class="icon" aria-hidden="true">📂</span>
+        <span class="main">选择文件夹</span>
+        <span class="sub">电脑 / SD 卡 · 递归扫描整个文件夹（含 RAW）</span>
+        <input id="picker-folder" class="visually-hidden" type="file" webkitdirectory multiple aria-label="选择文件夹" />
+      </label>
+      <label class="dropzone" for="picker-photos">
+        <span class="icon" aria-hidden="true">🖼️</span>
+        <span class="main">从相册 / 选照片</span>
+        <span class="sub">手机点此进相册多选 · 截图自动跳过</span>
+        <input id="picker-photos" class="visually-hidden" type="file" accept="image/*" multiple aria-label="从相册选择照片" />
+      </label>
+    </div>
 
     <div class="url-input">
       <label class="url-label" for="urls">或粘贴照片直链（每行一个）</label>

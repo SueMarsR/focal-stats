@@ -1,7 +1,6 @@
 import { analyze, parseConfig } from '@focal-stats/core';
 import type { AnalyzeConfig, FocalStats, PhotoExif, SkippedFile } from '@focal-stats/core';
 import { barChartSvg } from './chart';
-import { isMobileUA } from './device';
 import { parseStoredConfig, serializeConfig } from './settings';
 import { shareCardSvg } from './share-card';
 import { escHtml } from './utils';
@@ -190,11 +189,13 @@ async function shareCard(): Promise<void> {
   downloadBlob(blob, 'focal-stats.png');
 }
 
-$('picker').addEventListener('change', (ev) => {
+function onPickFiles(ev: Event): void {
   const files = Array.from((ev.target as HTMLInputElement).files ?? []);
   if (files.length === 0) return;
   runWorker({ kind: 'files', files, headerBytes: HEADER_BYTES }, files.length, '文件');
-});
+}
+$('picker-folder').addEventListener('change', onPickFiles);
+$('picker-photos').addEventListener('change', onPickFiles);
 
 $('parse-urls').addEventListener('click', () => {
   const urls = $<HTMLTextAreaElement>('urls')
@@ -211,19 +212,5 @@ $('parse-urls').addEventListener('click', () => {
 
 $('share-card').addEventListener('click', shareCard);
 
-function applyMobilePickerMode(): void {
-  if (!isMobileUA(navigator.userAgent, navigator.maxTouchPoints)) return;
-  const picker = $('picker');
-  if (!picker) return;
-  picker.removeAttribute('webkitdirectory');
-  picker.setAttribute('accept', 'image/*');
-  picker.setAttribute('aria-label', '点击从相册选照片');
-  const main = document.querySelector('.dropzone .main');
-  if (main) main.textContent = '点击从相册选照片';
-  const sub = document.querySelector('.dropzone .sub');
-  if (sub) sub.textContent = '从相册多选照片 · 截图自动跳过 · 只读文件头，不上传';
-}
-
-applyMobilePickerMode();
 loadFormFromStorage();
 bindReRender();
