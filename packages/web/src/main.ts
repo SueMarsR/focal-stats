@@ -1,13 +1,16 @@
 import { analyze, parseConfig } from '@focal-stats/core';
-import type { AnalyzeConfig, PhotoExif, SkippedFile } from '@focal-stats/core';
+import type { AnalyzeConfig, FocalStats, PhotoExif, SkippedFile } from '@focal-stats/core';
 import { barChartSvg } from './chart';
 import { isMobileUA } from './device';
 import { parseStoredConfig, serializeConfig } from './settings';
+import { shareCardSvg } from './share-card';
 import { escHtml } from './utils';
 
 const HEADER_BYTES = 1024 * 1024;
 const $ = <T extends HTMLElement = HTMLInputElement>(id: string): T =>
   document.getElementById(id) as T;
+
+let lastStats: FocalStats | null = null;
 
 function readConfigFromForm(): AnalyzeConfig {
   return parseConfig({
@@ -42,10 +45,14 @@ function render(photos: PhotoExif[], skipped: SkippedFile[]): void {
     document.getElementById('insights')!.innerHTML = '';
     hero.innerHTML = '';
     hero.style.display = 'none';
+    lastStats = null;
+    document.getElementById('share-row')!.style.display = 'none';
     return;
   }
   localStorage.setItem('focal-stats-config', serializeConfig(config));
   const stats = analyze(photos, config, skipped);
+  lastStats = stats;
+  document.getElementById('share-row')!.style.display = stats.total > 0 ? '' : 'none';
   if (stats.total > 0 && stats.topFocal[0]) {
     const top = stats.topFocal[0];
     const modeLabel = stats.mode === 'equiv35' ? '35mm 等效' : '原始焦距';
@@ -117,6 +124,60 @@ function isHttpUrl(s: string): boolean {
   }
 }
 
+/** Rasterize an SVG string to a PNG Blob at `scale`× for a crisp share image. */
+function svgToPng(svg: string, w: number, h: number, scale = 2): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const objUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext('2d');
+      URL.revokeObjectURL(objUrl);
+      if (!ctx) {
+        reject(new Error('无法创建画布'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('导出 PNG 失败'))), 'image/png');
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objUrl);
+      reject(new Error('卡片渲染失败'));
+    };
+    img.src = objUrl;
+  });
+}
+
+function downloadBlob(blob: Blob, name: string): void {
+  const objUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objUrl;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(objUrl);
+}
+
+/** Build the share card PNG and offer it via the native share sheet, else download. */
+async function shareCard(): Promise<void> {
+  if (!lastStats || lastStats.total === 0) return;
+  const status = document.getElementById('status')!;
+  try {
+    const blob = await svgToPng(shareCardSvg(lastStats), 900, 1125);
+    const file = new File([blob], 'focal-stats.png', { type: 'image/png' });
+    const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
+    if (nav.canShare?.({ files: [file] }) && navigator.share) {
+      await navigator.share({ files: [file], title: '我的焦段画像', text: '我的焦段画像 · Focal-Stats' });
+    } else {
+      downloadBlob(blob, 'focal-stats.png');
+    }
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return; // user dismissed the share sheet
+    status.textContent = `生成卡片失败：${err instanceof Error ? err.message : String(err)}`;
+  }
+}
+
 $('picker').addEventListener('change', (ev) => {
   const files = Array.from((ev.target as HTMLInputElement).files ?? []);
   if (files.length === 0) return;
@@ -135,6 +196,8 @@ $('parse-urls').addEventListener('click', () => {
   }
   runWorker({ kind: 'urls', urls, headerBytes: HEADER_BYTES }, urls.length, '链接');
 });
+
+$('share-card').addEventListener('click', shareCard);
 
 function applyMobilePickerMode(): void {
   if (!isMobileUA(navigator.userAgent, navigator.maxTouchPoints)) return;
