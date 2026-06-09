@@ -9,13 +9,11 @@ everything inside your browser.
 
 ## Screenshots
 
-| Pick a folder | Focal-length results |
+| Light | Dark |
 |---|---|
-| ![Empty state](docs/screenshots/empty.png) | ![Results](docs/screenshots/result.png) |
+| ![Light](docs/screenshots/result-light.png) | ![Dark](docs/screenshots/result-dark.png) |
 
-> Dark "Lightroom" style · a hero number for your most-used focal length · amber
-> histogram (top bucket highlighted) · screenshots and other photos without
-> focal-length data are skipped automatically.
+> Apple style: follows system light/dark automatically · frosted-glass panels · system-blue gradient hero number · most-used focal bucket highlighted.
 
 ## Web
 Hosted on GitHub Pages: pick your SD-card folder → instantly see a focal-length
