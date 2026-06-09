@@ -69,6 +69,22 @@ describe('shareCardSvg', () => {
     expect(svg).toContain('&lt;b&gt;');
   });
 
+  it('常规桶数为 4:5（高 1125）', () => {
+    expect(shareCardSvg(stats)).toContain('height="1125"'); // 8 default buckets fit
+  });
+
+  it('桶很多时卡片高度自适应增长，页脚不被裁剪', () => {
+    const manyBoundaries = Array.from({ length: 18 }, (_, i) => (i + 1) * 10); // → 19 buckets
+    const tall = analyze(
+      [photo({ focalLength35mm: 35, ...SONY })],
+      { ...DEFAULT_CONFIG, bucketBoundaries: manyBoundaries },
+    );
+    const svg = shareCardSvg(tall);
+    const h = Number(svg.match(/^<svg width="\d+" height="(\d+)"/)![1]);
+    expect(h).toBeGreaterThan(1125);
+    expect(svg).toContain('focal-stats'); // footer still present below the chart
+  });
+
   it('多机身时标注「等 N 台」', () => {
     const multi = analyze(
       [

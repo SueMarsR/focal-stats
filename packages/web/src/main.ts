@@ -162,20 +162,32 @@ function downloadBlob(blob: Blob, name: string): void {
 /** Build the share card PNG and offer it via the native share sheet, else download. */
 async function shareCard(): Promise<void> {
   if (!lastStats || lastStats.total === 0) return;
-  const status = document.getElementById('status')!;
+  const note = document.querySelector<HTMLElement>('#share-row .share-hint');
+
+  // Rasterize at the card's own intrinsic size (height is dynamic), so a tall card
+  // (many buckets) is never clipped and the dimensions can't drift from the SVG.
+  let blob: Blob;
   try {
-    const blob = await svgToPng(shareCardSvg(lastStats), 900, 1125);
-    const file = new File([blob], 'focal-stats.png', { type: 'image/png' });
-    const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
-    if (nav.canShare?.({ files: [file] }) && navigator.share) {
-      await navigator.share({ files: [file], title: '我的焦段画像', text: '我的焦段画像 · Focal-Stats' });
-    } else {
-      downloadBlob(blob, 'focal-stats.png');
-    }
+    const svg = shareCardSvg(lastStats);
+    const dims = svg.match(/^<svg width="(\d+)" height="(\d+)"/);
+    blob = await svgToPng(svg, dims ? Number(dims[1]) : 900, dims ? Number(dims[2]) : 1125);
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') return; // user dismissed the share sheet
-    status.textContent = `生成卡片失败：${err instanceof Error ? err.message : String(err)}`;
+    if (note) note.textContent = `生成卡片失败：${err instanceof Error ? err.message : String(err)}`;
+    return;
   }
+
+  const file = new File([blob], 'focal-stats.png', { type: 'image/png' });
+  const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
+  if (nav.canShare?.({ files: [file] }) && navigator.share) {
+    try {
+      await navigator.share({ files: [file], title: '我的焦段画像', text: '我的焦段画像 · Focal-Stats' });
+      return;
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return; // user dismissed the sheet
+      // any other share failure → fall through to download rather than losing the card
+    }
+  }
+  downloadBlob(blob, 'focal-stats.png');
 }
 
 $('picker').addEventListener('change', (ev) => {
