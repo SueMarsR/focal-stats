@@ -2,9 +2,10 @@ import type { FocalStats, GroupStat } from '@focal-stats/core';
 import { barChartSvg } from './chart';
 import { escHtml } from './utils';
 
-// 4:5 portrait — best fit for 小红书 / Instagram feed.
+// 4:5 portrait by default — best fit for 小红书 / Instagram feed. Height grows
+// beyond BASE_H when the histogram is tall (many custom buckets) so nothing clips.
 const W = 900;
-const H = 1125;
+const BASE_H = 1125;
 const PAD = 64;
 
 const BG = '#16181c';
@@ -17,6 +18,9 @@ const MONO = 'ui-monospace,SFMono-Regular,Menlo,monospace';
 
 const DEFAULT_URL = 'suemarsr.github.io/focal-stats';
 const UNKNOWN = '未知';
+
+const CHART_Y = 430;
+const BAR_H = 44;
 
 export interface ShareCardOpts {
   /** Branding URL shown in the footer. */
@@ -35,10 +39,10 @@ function deviceLine(icon: string, picked: { key: string; count: number }, unit: 
 }
 
 /**
- * Render a shareable 4:5 "镜头画像" card as a standalone SVG string: hero focal
- * length, the focal-length histogram (reused from `barChartSvg`), the user's main
- * camera body + lens, and project branding. Pure and deterministic so it can be
- * unit-tested; the caller rasterizes it to PNG for download / the Web Share API.
+ * Render a shareable "镜头画像" card as a standalone SVG string: hero focal length,
+ * the focal-length histogram (reused from `barChartSvg`), the user's main camera body
+ * + lens, and project branding. Pure and deterministic so it can be unit-tested; the
+ * caller rasterizes it to PNG for download / the Web Share API.
  */
 export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): string {
   const url = opts.url ?? DEFAULT_URL;
@@ -49,22 +53,27 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
 
   // Histogram embedded as a nested <svg> at full content width.
   const chartW = W - PAD * 2;
-  const barH = 44;
-  const chartH = Math.max(barH, stats.buckets.length * barH);
-  const chartY = 430;
+  const chartH = Math.max(BAR_H, stats.buckets.length * BAR_H);
 
-  // Device block sits below the chart.
+  // Device block flows below the chart.
   const cam = topReal(stats.byCamera);
   const lens = topReal(stats.byLens);
-  let dy = chartY + chartH + 86;
   const deviceLines: string[] = [];
+  let lineY = CHART_Y + chartH + 90;
   if (cam) {
-    deviceLines.push(deviceLine('📷', cam, '台', dy));
-    dy += 48;
+    deviceLines.push(deviceLine('📷', cam, '台', lineY));
+    lineY += 48;
   }
   if (lens) {
-    deviceLines.push(deviceLine('🔭', lens, '支', dy));
+    deviceLines.push(deviceLine('🔭', lens, '支', lineY));
+    lineY += 48;
   }
+  const contentBottom = cam || lens ? lineY - 48 : CHART_Y + chartH;
+
+  // Keep 4:5 for typical cards; grow so the footer never overlaps a tall chart.
+  const H = Math.max(BASE_H, contentBottom + 130);
+  const footerRuleY = H - 110;
+  const footerTextY = H - 64;
 
   return [
     `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`,
@@ -80,15 +89,15 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
     `<text x="${PAD}" y="372" font-size="30" fill="${MUTED}" font-family="${SANS}">最常用 · ${modeLabel} · ${heroPct}% · ${stats.total} 张</text>`,
 
     // Histogram (reuse barChartSvg, nested at content width)
-    `<svg x="${PAD}" y="${chartY}" width="${chartW}" height="${chartH}">${barChartSvg(stats, chartW, barH)}</svg>`,
+    `<svg x="${PAD}" y="${CHART_Y}" width="${chartW}" height="${chartH}">${barChartSvg(stats, chartW, BAR_H)}</svg>`,
 
     // Device block
     ...deviceLines,
 
     // Footer
-    `<rect x="${PAD}" y="${H - 110}" width="${W - PAD * 2}" height="1.5" fill="${BORDER}"/>`,
-    `<text x="${PAD}" y="${H - 64}" font-size="26" fill="${MUTED}" font-family="${MONO}">${escHtml(url)}</text>`,
-    `<text x="${W - PAD}" y="${H - 64}" text-anchor="end" font-size="24" fill="${MUTED}" font-family="${SANS}">照片不离开你的设备</text>`,
+    `<rect x="${PAD}" y="${footerRuleY}" width="${W - PAD * 2}" height="1.5" fill="${BORDER}"/>`,
+    `<text x="${PAD}" y="${footerTextY}" font-size="26" fill="${MUTED}" font-family="${MONO}">${escHtml(url)}</text>`,
+    `<text x="${W - PAD}" y="${footerTextY}" text-anchor="end" font-size="24" fill="${MUTED}" font-family="${SANS}">照片不离开你的设备</text>`,
 
     `</svg>`,
   ].join('');
