@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { analyze, DEFAULT_CONFIG } from '@focal-stats/core';
 import type { PhotoExif } from '@focal-stats/core';
 import { shareCardSvg } from './share-card';
+import { BRAND_ICONS } from './brand-icons';
+import { BODY_GLYPHS } from './body-glyphs';
 
 const photo = (over: Partial<PhotoExif>): PhotoExif => ({
   name: 'x',
@@ -66,9 +68,50 @@ describe('shareCardSvg', () => {
     const noDev = analyze([photo({ focalLength35mm: 35 })], DEFAULT_CONFIG);
     const svg = shareCardSvg(noDev);
     expect(svg.startsWith('<svg')).toBe(true);
-    expect(svg).not.toContain('📷');
-    expect(svg).not.toContain('🔭');
+    expect(svg).not.toContain(BODY_GLYPHS.camera.path);
+    expect(svg).not.toContain(BODY_GLYPHS.lens.path);
     expect(svg).not.toContain('未知');
+    expect(svg).not.toContain('品牌名称'); // no disclaimer when no device shown
+  });
+
+  it('主力机身渲染品牌图标 + 机身类型图标 + 镜头图标（Sony 有图标）', () => {
+    const svg = shareCardSvg(stats);
+    expect(svg).toContain(BRAND_ICONS.sony!.path); // brand mark embedded inline
+    expect(svg).toContain(BODY_GLYPHS.camera.path); // body-type glyph
+    expect(svg).toContain(BODY_GLYPHS.lens.path); // lens line glyph
+  });
+
+  it('缺失图标的品牌（佳能）退化为文字，不嵌任何品牌图标', () => {
+    const canon = analyze(
+      [photo({ focalLength35mm: 35, cameraMake: 'Canon', cameraModel: 'Canon EOS R6' })],
+      DEFAULT_CONFIG,
+    );
+    const svg = shareCardSvg(canon);
+    expect(svg).toContain('Canon EOS R6');
+    expect(Object.values(BRAND_ICONS).every((g) => !svg.includes(g.path))).toBe(true);
+    expect(svg).toContain(BODY_GLYPHS.camera.path); // body glyph still shown
+  });
+
+  it('图标缺失且型号不含品牌名时，前置文字商标', () => {
+    const sigma = analyze(
+      [photo({ focalLength35mm: 45, cameraMake: 'SIGMA', cameraModel: 'fp' })],
+      DEFAULT_CONFIG,
+    );
+    expect(shareCardSvg(sigma)).toContain('Sigma fp'); // wordmark prefix
+  });
+
+  it('手机型号渲染手机图标', () => {
+    const phone = analyze(
+      [photo({ focalLength35mm: 26, cameraMake: 'Apple', cameraModel: 'iPhone 15 Pro' })],
+      DEFAULT_CONFIG,
+    );
+    const svg = shareCardSvg(phone);
+    expect(svg).toContain(BRAND_ICONS.apple!.path);
+    expect(svg).toContain(BODY_GLYPHS.phone.path);
+  });
+
+  it('有品牌设备时展示商标免责声明', () => {
+    expect(shareCardSvg(stats)).toContain('品牌名称与标识为各自所有者的商标');
   });
 
   it('转义设备名中的 HTML 特殊字符', () => {
