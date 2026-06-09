@@ -1,6 +1,8 @@
 import type { FocalStats, GroupStat } from '@focal-stats/core';
-import { representativeFocal } from '@focal-stats/core';
+import { representativeFocal, detectBrand, detectBodyType } from '@focal-stats/core';
 import { barChartSvg } from './chart';
+import { BRAND_ICONS, type IconGlyph } from './brand-icons';
+import { BODY_GLYPHS } from './body-glyphs';
 import { escHtml } from './utils';
 
 // 4:5 portrait by default — best fit for 小红书 / Instagram feed. Height grows
@@ -25,6 +27,9 @@ const UNKNOWN = '未知';
 
 const CHART_Y = 430;
 const BAR_H = 44;
+const ICON = 34; // device glyph box (square)
+const LINE_H = 56; // device line vertical pitch (icons are taller than the text)
+const DISCLAIMER = '品牌名称与标识为各自所有者的商标';
 
 export interface ShareCardOpts {
   /** Branding URL shown in the footer. */
@@ -32,14 +37,52 @@ export interface ShareCardOpts {
 }
 
 /** Most-used real (non-"未知") group plus how many distinct real groups exist. */
-function topReal(groups: GroupStat[]): { key: string; count: number } | null {
+function topReal(groups: GroupStat[]): { top: GroupStat; realCount: number } | null {
   const real = groups.filter((g) => g.key !== UNKNOWN);
-  return real.length ? { key: real[0].key, count: real.length } : null;
+  return real.length ? { top: real[0], realCount: real.length } : null;
 }
 
-function deviceLine(icon: string, picked: { key: string; count: number }, unit: string, y: number): string {
-  const more = picked.count > 1 ? ` 等 ${picked.count} ${unit}` : '';
-  return `<text x="${PAD}" y="${y}" font-size="30" fill="${TEXT}" font-family="${SANS}">${icon} ${escHtml(picked.key)}${more}</text>`;
+/** Inline a single-path glyph as a nested <svg> — self-contained, no font, no remote ref. */
+function iconMarkup(glyph: IconGlyph, x: number, y: number, size: number, fill: string): string {
+  const fr = glyph.fillRule ? ` fill-rule="${glyph.fillRule}"` : '';
+  return `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="${glyph.viewBox}"><path d="${glyph.path}" fill="${fill}"${fr}/></svg>`;
+}
+
+/**
+ * Camera line: brand icon (or text wordmark when the brand has no bundled icon) +
+ * a generic body-type glyph + the model text. Brand is identified from EXIF Make
+ * (the reliable signal) so it works even when the model string omits the brand name.
+ */
+function cameraLine(top: GroupStat, realCount: number, y: number): string {
+  const brand = detectBrand(top.make, top.key);
+  const body = detectBodyType(top.make, top.key);
+  const bodyGlyph = BODY_GLYPHS[body === 'unknown' ? 'camera' : body];
+  const brandGlyph = brand ? BRAND_ICONS[brand.id] : undefined;
+  const iconTop = y - 27;
+  const parts: string[] = [];
+  let x = PAD;
+  if (brandGlyph) {
+    parts.push(iconMarkup(brandGlyph, x, iconTop, ICON, TEXT));
+    x += ICON + 12;
+  }
+  parts.push(iconMarkup(bodyGlyph, x, iconTop, ICON, MUTED));
+  x += ICON + 16;
+  // Prefix the wordmark only when there's no icon AND the model doesn't already name the brand.
+  const needWordmark = !!brand && !brandGlyph && !top.key.toLowerCase().includes(brand.name.toLowerCase());
+  const more = realCount > 1 ? ` 等 ${realCount} 台` : '';
+  const label = (needWordmark ? `${brand!.name} ` : '') + top.key + more;
+  parts.push(`<text x="${x}" y="${y}" font-size="30" fill="${TEXT}" font-family="${SANS}">${escHtml(label)}</text>`);
+  return parts.join('');
+}
+
+/** Lens line: lens glyph + model text (no brand icon in v1 — lens EXIF strings are unreliable). */
+function lensLine(top: GroupStat, realCount: number, y: number): string {
+  const more = realCount > 1 ? ` 等 ${realCount} 支` : '';
+  const x = PAD + ICON + 16;
+  return (
+    iconMarkup(BODY_GLYPHS.lens, PAD, y - 27, ICON, MUTED) +
+    `<text x="${x}" y="${y}" font-size="30" fill="${TEXT}" font-family="${SANS}">${escHtml(top.key + more)}</text>`
+  );
 }
 
 /**
@@ -64,21 +107,25 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
   const cam = topReal(stats.byCamera);
   const lens = topReal(stats.byLens);
   const deviceLines: string[] = [];
-  let lineY = CHART_Y + chartH + 90;
+  let lineY = CHART_Y + chartH + 96;
   if (cam) {
-    deviceLines.push(deviceLine('📷', cam, '台', lineY));
-    lineY += 48;
+    deviceLines.push(cameraLine(cam.top, cam.realCount, lineY));
+    lineY += LINE_H;
   }
   if (lens) {
-    deviceLines.push(deviceLine('🔭', lens, '支', lineY));
-    lineY += 48;
+    deviceLines.push(lensLine(lens.top, lens.realCount, lineY));
+    lineY += LINE_H;
   }
-  const contentBottom = cam || lens ? lineY - 48 : CHART_Y + chartH;
+  const contentBottom = cam || lens ? lineY - LINE_H : CHART_Y + chartH;
 
-  // Keep 4:5 for typical cards; grow so the footer never overlaps a tall chart.
-  const H = Math.max(BASE_H, contentBottom + 130);
-  const footerRuleY = H - 110;
-  const footerTextY = H - 64;
+  // Keep 4:5 for typical cards; grow so the footer/disclaimer never overlap a tall chart.
+  const H = Math.max(BASE_H, contentBottom + 170);
+  const footerRuleY = H - 120;
+  const footerTextY = H - 74;
+  // Trademark disclaimer — shown only when a device line is rendered (nominative use).
+  const disclaimer = cam
+    ? `<text x="${PAD}" y="${H - 36}" font-size="17" fill="${MUTED}" font-family="${SANS}">${DISCLAIMER}</text>`
+    : '';
 
   return [
     `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`,
@@ -103,6 +150,7 @@ export function shareCardSvg(stats: FocalStats, opts: ShareCardOpts = {}): strin
     `<rect x="${PAD}" y="${footerRuleY}" width="${W - PAD * 2}" height="1.5" fill="${BORDER}"/>`,
     `<text x="${PAD}" y="${footerTextY}" font-size="26" fill="${MUTED}" font-family="${MONO}">${escHtml(url)}</text>`,
     `<text x="${W - PAD}" y="${footerTextY}" text-anchor="end" font-size="24" fill="${MUTED}" font-family="${SANS}">照片不离开你的设备</text>`,
+    disclaimer,
 
     `</svg>`,
   ].join('');
