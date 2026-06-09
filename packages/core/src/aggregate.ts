@@ -16,16 +16,38 @@ function countTop(focals: number[]): { focal: number; count: number }[] {
     .sort((a, b) => b.count - a.count || a.focal - b.focal);
 }
 
-function groupBy(entries: { key: string | null; focal: number }[]): GroupStat[] {
-  const map = new Map<string, number[]>();
+/** Most frequent non-null value, or null if none present. */
+function modeOf(values: (string | null)[]): string | null {
+  const counts = new Map<string, number>();
+  for (const v of values) if (v != null) counts.set(v, (counts.get(v) ?? 0) + 1);
+  let best: string | null = null;
+  let bestN = 0;
+  for (const [v, n] of counts) if (n > bestN) {
+    best = v;
+    bestN = n;
+  }
+  return best;
+}
+
+function groupBy(entries: { key: string | null; focal: number; make?: string | null }[]): GroupStat[] {
+  const map = new Map<string, { focals: number[]; makes: (string | null)[] }>();
   for (const e of entries) {
     const key = e.key ?? '未知';
-    const arr = map.get(key);
-    if (arr) arr.push(e.focal);
-    else map.set(key, [e.focal]);
+    const g = map.get(key);
+    if (g) {
+      g.focals.push(e.focal);
+      g.makes.push(e.make ?? null);
+    } else {
+      map.set(key, { focals: [e.focal], makes: [e.make ?? null] });
+    }
   }
   return [...map.entries()]
-    .map(([key, focals]) => ({ key, count: focals.length, topFocal: countTop(focals)[0].focal }))
+    .map(([key, g]) => ({
+      key,
+      count: g.focals.length,
+      topFocal: countTop(g.focals)[0].focal,
+      make: modeOf(g.makes),
+    }))
     .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
 }
 
@@ -42,7 +64,7 @@ export function aggregate(
       matchesFilter(p.cameraModel, config.filterCamera),
   );
 
-  const usable: { focal: number; lens: string | null; camera: string | null }[] = [];
+  const usable: { focal: number; lens: string | null; camera: string | null; make: string | null }[] = [];
   const skipped: SkippedFile[] = [];
   let equivFallbackCount = 0;
 
@@ -53,7 +75,7 @@ export function aggregate(
       continue;
     }
     if (fellBack) equivFallbackCount++;
-    usable.push({ focal, lens: p.lensModel, camera: p.cameraModel });
+    usable.push({ focal, lens: p.lensModel, camera: p.cameraModel, make: p.cameraMake });
   }
 
   const total = usable.length;
@@ -71,6 +93,6 @@ export function aggregate(
     exact,
     topFocal: exact.slice(0, config.topN).map((e) => ({ ...e, percentage: pct(e.count) })),
     byLens: groupBy(usable.map((u) => ({ key: u.lens, focal: u.focal }))),
-    byCamera: groupBy(usable.map((u) => ({ key: u.camera, focal: u.focal }))),
+    byCamera: groupBy(usable.map((u) => ({ key: u.camera, focal: u.focal, make: u.make }))),
   };
 }

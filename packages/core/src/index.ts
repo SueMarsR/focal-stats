@@ -22,3 +22,5 @@ export { extractExif, mapTags } from './exif';
 export { aggregate } from './aggregate';
 export { generateInsights } from './insights';
 export { representativeFocal, type Representative } from './representative';
+export { detectBrand, type Brand, type BrandId } from './brand';
+export { detectBodyType, type BodyType } from './body-type';
