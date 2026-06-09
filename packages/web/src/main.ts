@@ -67,6 +67,12 @@ function render(photos: PhotoExif[], skipped: SkippedFile[]): void {
   document.getElementById('chart')!.innerHTML = barChartSvg(stats);
   document.getElementById('insights')!.innerHTML =
     '<h2 class="panel-title">洞察</h2>' + stats.insights.map((i) => `<div class="card">${escHtml(i.message)}</div>`).join('');
+  const noFocal = stats.skipped.filter(
+    (s) => s.reason === 'no-focal-length' || s.reason === 'no-exif',
+  ).length;
+  document.getElementById('status')!.textContent =
+    `完成：${stats.total} 张含焦段，已跳过 ${stats.skipped.length} 张` +
+    (noFocal > 0 ? `（其中 ${noFocal} 张无焦段/截图，未计入统计）` : '');
 }
 
 let lastPhotos: PhotoExif[] = [];
@@ -101,7 +107,6 @@ function runWorker(payload: ParseRequest, count: number, noun: string): void {
     } else if (d.type === 'done') {
       lastPhotos = d.photos;
       lastSkipped = d.skipped;
-      status.textContent = `完成：${d.photos.length} 张含焦段，跳过 ${d.skipped.length}`;
       render(lastPhotos, lastSkipped);
       worker.terminate();
       if (currentWorker === worker) currentWorker = null;
