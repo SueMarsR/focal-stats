@@ -1,6 +1,7 @@
 import { analyze, parseConfig } from '@focal-stats/core';
 import type { AnalyzeConfig, PhotoExif, SkippedFile } from '@focal-stats/core';
 import { barChartSvg } from './chart';
+import { isMobileUA } from './device';
 import { parseStoredConfig, serializeConfig } from './settings';
 import { escHtml } from './utils';
 
@@ -135,5 +136,19 @@ $('parse-urls').addEventListener('click', () => {
   runWorker({ kind: 'urls', urls, headerBytes: HEADER_BYTES }, urls.length, '链接');
 });
 
+function applyMobilePickerMode(): void {
+  if (!isMobileUA(navigator.userAgent, navigator.maxTouchPoints)) return;
+  const picker = $('picker');
+  if (!picker) return;
+  picker.removeAttribute('webkitdirectory');
+  picker.setAttribute('accept', 'image/*');
+  picker.setAttribute('aria-label', '点击从相册选照片');
+  const main = document.querySelector('.dropzone .main');
+  if (main) main.textContent = '点击从相册选照片';
+  const sub = document.querySelector('.dropzone .sub');
+  if (sub) sub.textContent = '从相册多选照片 · 截图自动跳过 · 只读文件头，不上传';
+}
+
+applyMobilePickerMode();
 loadFormFromStorage();
 bindReRender();
