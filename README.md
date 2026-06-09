@@ -35,3 +35,8 @@ npm run build:cli # 构建 CLI
 
 ## 测试夹具
 `packages/core/test/fixtures/sample.jpg` 由 `make-fixture.mjs` 生成（需 dev 依赖 sharp+piexifjs），已提交，CI 无需重新生成。
+
+## 许可 / License
+本项目采用 [AGPL-3.0](./LICENSE)。你可以自由使用、修改、分发，但**任何修改版——包括作为网络服务部署的版本——都必须同样以 AGPL-3.0 开源**，以防止他人将本项目闭源、包装成专有产品。请保留版权与许可声明。
+
+© 2026 SueMarsR
