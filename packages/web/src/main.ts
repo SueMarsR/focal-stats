@@ -2,6 +2,7 @@ import { analyze, parseConfig } from '@focal-stats/core';
 import type { AnalyzeConfig, FocalStats, PhotoExif, SkippedFile } from '@focal-stats/core';
 import { barChartSvg } from './chart';
 import { parseStoredConfig, serializeConfig } from './settings';
+import { SAMPLE_PHOTOS } from './sample-data';
 import { shareCardSvg } from './share-card';
 import { escHtml } from './utils';
 
@@ -211,6 +212,18 @@ $('parse-urls').addEventListener('click', () => {
 });
 
 $('share-card').addEventListener('click', shareCard);
+
+/** Load the bundled sample library so a first-time visitor sees results instantly. */
+function loadDemo(): void {
+  currentWorker?.terminate(); // a mid-flight parse must not overwrite the demo later
+  currentWorker = null;
+  lastPhotos = SAMPLE_PHOTOS;
+  lastSkipped = [];
+  document.getElementById('status')!.textContent =
+    `已加载示例数据（演示，共 ${SAMPLE_PHOTOS.length} 张）— 换成你自己的照片试试`;
+  render(SAMPLE_PHOTOS, []);
+}
+$('demo').addEventListener('click', loadDemo);
 
 loadFormFromStorage();
 bindReRender();
