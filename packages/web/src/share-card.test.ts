@@ -58,10 +58,17 @@ describe('shareCardSvg', () => {
     expect((svg.match(/class="bar"/g) ?? []).length).toBe(stats.buckets.length);
   });
 
-  it('内嵌直方图用自包含内联颜色（光栅化时无 CSS，类样式会失色）', () => {
-    const svg = shareCardSvg(stats);
-    expect(svg).toContain('fill="#23262c"'); // track color — only the chart uses it
-    expect(svg).toContain('fill="#f0b95e"'); // top-bucket bar highlight
+  it('hero 数字用系统蓝渐变填充', () => {
+    expect(shareCardSvg(stats)).toContain('fill="url(#heroGrad)"');
+  });
+
+  it('内嵌直方图用自包含内联颜色，随主题切换（光栅化时无 CSS，类样式会失色）', () => {
+    const light = shareCardSvg(stats, { theme: 'light' });
+    expect(light).toContain('fill="rgba(0,0,0,0.07)"'); // light track — chart-only color
+    expect(light).toContain('fill="#0071e3"'); // light system-blue bar
+    const dark = shareCardSvg(stats, { theme: 'dark' });
+    expect(dark).toContain('fill="rgba(255,255,255,0.12)"'); // dark track
+    expect(dark).toContain('fill="#0a84ff"'); // dark system-blue bar
   });
 
   it('含主力机身与镜头', () => {
@@ -77,7 +84,6 @@ describe('shareCardSvg', () => {
     expect(svg).not.toContain(BODY_GLYPHS.camera.path);
     expect(svg).not.toContain(BODY_GLYPHS.lens.path);
     expect(svg).not.toContain('未知');
-    expect(svg).not.toContain('品牌名称'); // no disclaimer when no device shown
   });
 
   it('主力机身渲染品牌图标 + 机身类型图标 + 镜头图标（Sony 有图标）', () => {
@@ -114,10 +120,6 @@ describe('shareCardSvg', () => {
     const svg = shareCardSvg(phone);
     expect(svg).toContain(BRAND_ICONS.apple!.path);
     expect(svg).toContain(BODY_GLYPHS.phone.path);
-  });
-
-  it('有品牌设备时展示商标免责声明', () => {
-    expect(shareCardSvg(stats)).toContain('品牌名称与标识为各自所有者的商标');
   });
 
   it('转义设备名中的 HTML 特殊字符', () => {

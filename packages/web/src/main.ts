@@ -171,7 +171,8 @@ async function shareCard(): Promise<void> {
   // (many buckets) is never clipped and the dimensions can't drift from the SVG.
   let blob: Blob;
   try {
-    const svg = shareCardSvg(lastStats);
+    const dark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+    const svg = shareCardSvg(lastStats, { theme: dark ? 'dark' : 'light' });
     const dims = svg.match(/^<svg width="(\d+)" height="(\d+)"/);
     blob = await svgToPng(svg, dims ? Number(dims[1]) : 900, dims ? Number(dims[2]) : 1125);
   } catch (err) {
