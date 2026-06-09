@@ -25,6 +25,8 @@ export interface GroupStat {
   key: string;
   count: number;
   topFocal: number;
+  /** Device manufacturer (EXIF Make) for `byCamera` groups; `null` for lens groups. */
+  make: string | null;
 }
 
 export interface Insight {

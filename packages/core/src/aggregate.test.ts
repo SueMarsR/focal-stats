@@ -33,8 +33,8 @@ describe('aggregate', () => {
   it('按镜头分组', () => {
     const s = aggregate(photos, DEFAULT_CONFIG);
     expect(s.byLens).toEqual([
-      { key: 'A', count: 2, topFocal: 35 },
-      { key: 'B', count: 1, topFocal: 50 },
+      { key: 'A', count: 2, topFocal: 35, make: null },
+      { key: 'B', count: 1, topFocal: 50, make: null },
     ]);
   });
 
@@ -53,15 +53,28 @@ describe('aggregate', () => {
   it('按机身分组', () => {
     const s = aggregate(photos, DEFAULT_CONFIG);
     expect(s.byCamera).toEqual([
-      { key: 'C1', count: 2, topFocal: 35 },
-      { key: 'C2', count: 1, topFocal: 50 },
+      { key: 'C1', count: 2, topFocal: 35, make: null },
+      { key: 'C2', count: 1, topFocal: 50, make: null },
     ]);
   });
 
   it('镜头为 null 归入未知组', () => {
     const p = [photo({ name: '1', focalLength35mm: 35, lensModel: null })];
     const s = aggregate(p, DEFAULT_CONFIG);
-    expect(s.byLens).toEqual([{ key: '未知', count: 1, topFocal: 35 }]);
+    expect(s.byLens).toEqual([{ key: '未知', count: 1, topFocal: 35, make: null }]);
+  });
+
+  it('byCamera 组携带 cameraMake(品牌识别用,model 串常不含品牌名)', () => {
+    const p = [
+      photo({ focalLength35mm: 35, cameraModel: 'ILCE-7M4', cameraMake: 'SONY' }),
+      photo({ focalLength35mm: 50, cameraModel: 'ILCE-7M4', cameraMake: 'SONY' }),
+      photo({ focalLength35mm: 24, cameraModel: 'Canon EOS R6', cameraMake: 'Canon', lensModel: 'RF24' }),
+    ];
+    const s = aggregate(p, DEFAULT_CONFIG);
+    expect(s.byCamera.find((g) => g.key === 'ILCE-7M4')?.make).toBe('SONY');
+    expect(s.byCamera.find((g) => g.key === 'Canon EOS R6')?.make).toBe('Canon');
+    // Lens groups never carry a camera make.
+    expect(s.byLens.every((g) => g.make === null)).toBe(true);
   });
 
   it('分组计数相同时按 key 字典序排序', () => {
