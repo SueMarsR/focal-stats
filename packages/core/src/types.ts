@@ -10,7 +10,7 @@ export interface PhotoExif {
 
 export interface SkippedFile {
   name: string;
-  reason: 'no-exif' | 'no-focal-length' | 'parse-error' | 'read-error';
+  reason: 'no-exif' | 'no-focal-length' | 'parse-error' | 'read-error' | 'fetch-error' | 'http-error';
 }
 
 export interface Bucket {
