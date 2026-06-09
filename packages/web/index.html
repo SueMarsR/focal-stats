@@ -79,7 +79,7 @@
       .url-input { padding: 1rem 1.25rem; margin: 1.25rem 0; }
       .url-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; }
       #urls { width: 100%; background: var(--field-bg); color: var(--text); border: 1px solid var(--card-border); border-radius: 12px; padding: 0.6rem 0.75rem; font: inherit; resize: vertical; }
-      #urls:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+      #urls:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
 
       #parse-urls, #share-card, .demo-btn {
         font: inherit; font-weight: 600; cursor: pointer; border-radius: 12px; padding: 0.55rem 1.1rem;
@@ -99,6 +99,7 @@
         -webkit-text-fill-color: transparent; color: transparent; display: inline-block;
       }
       @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+        h1 { color: var(--text); -webkit-text-fill-color: currentColor; }
         .hero-num { color: var(--accent); -webkit-text-fill-color: currentColor; }
       }
       .hero-num .hero-unit { font-size: 1.3rem; font-weight: 500; -webkit-text-fill-color: var(--muted); color: var(--muted); }
